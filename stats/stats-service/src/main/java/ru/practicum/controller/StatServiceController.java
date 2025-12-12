@@ -1,5 +1,3 @@
-
-
 package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
@@ -17,8 +15,6 @@ import ru.practicum.service.StatService;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -26,12 +22,12 @@ import java.util.List;
 public class StatServiceController {
 
     private final StatService statService;
-    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     @PostMapping("/hit")
     public ResponseEntity<StatDto> addStatEvent(
             @RequestBody @Validated(Validator.Create.class) StatDto statDto) {
 
+        log.info("POST /hit received: {}", statDto);
         StatDto statEvent = statService.createStat(statDto);
         log.info("POST /hit - statDto saved: {}", statDto);
         return new ResponseEntity<>(statEvent, HttpStatus.CREATED);
@@ -39,8 +35,8 @@ public class StatServiceController {
 
     @GetMapping("/stats")
     public ResponseEntity<List<StatResponseDto>> readStatEvent(
-            @RequestParam @DateTimeFormat(pattern = DATE_FORMAT) LocalDateTime start,
-            @RequestParam @DateTimeFormat(pattern = DATE_FORMAT) LocalDateTime end,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique) {
 
@@ -50,4 +46,3 @@ public class StatServiceController {
         return new ResponseEntity<>(stats, HttpStatus.OK);
     }
 }
-

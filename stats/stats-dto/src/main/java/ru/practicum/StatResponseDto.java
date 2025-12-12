@@ -1,6 +1,8 @@
 package ru.practicum;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -13,11 +15,10 @@ public class StatResponseDto {
 
     private long hits;
 
+
     public StatResponseDto(String app, String uri, long hits) {
         this.app = app;
         this.uri = uri;
         this.hits = hits;
     }
-
-
 }

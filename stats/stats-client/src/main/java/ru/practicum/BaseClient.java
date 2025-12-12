@@ -1,5 +1,6 @@
 package ru.practicum;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -24,15 +25,21 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path,
+                                                          @Nullable Map<String, Object> parameters,
+                                                          @Nullable T body) {
         HttpEntity<T> requestEntity = body == null ? null : new HttpEntity<>(body);
 
         ResponseEntity<Object> statsServiceResponse;
         try {
             if (parameters != null) {
-                statsServiceResponse = restTemplate.exchange(path, method, requestEntity, Object.class, parameters);
+                statsServiceResponse = restTemplate.exchange(path, method, requestEntity,
+                        new ParameterizedTypeReference<Object>() {
+                        }, parameters);
             } else {
-                statsServiceResponse = restTemplate.exchange(path, method, requestEntity, Object.class);
+                statsServiceResponse = restTemplate.exchange(path, method, requestEntity,
+                        new ParameterizedTypeReference<Object>() {
+                        });
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
@@ -54,4 +61,3 @@ public class BaseClient {
         return responseBuilder.build();
     }
 }
-
