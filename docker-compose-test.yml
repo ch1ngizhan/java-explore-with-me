@@ -1,0 +1,31 @@
+name: java-explore-with-me-test
+services:
+  stats-db-local:
+    image: postgres:16.1
+    container_name: stats_db_test
+    ports:
+      - "2211:2001"
+    environment:
+      - POSTGRES_DB=statDB_local
+      - POSTGRES_USER=localuser
+      - POSTGRES_PASSWORD=localpass
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  main-db-local:
+    image: postgres:16.1
+    container_name: main_db_test
+    ports:
+      - "2211:2001"
+    environment:
+      - POSTGRES_DB=mainDB_local
+      - POSTGRES_USER=localuser
+      - POSTGRES_PASSWORD=localpass
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
