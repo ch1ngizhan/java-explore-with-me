@@ -21,11 +21,11 @@ public class StatClient extends BaseClient {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public StatClient(@Value("${stats-service.url}") String serverUrl, RestTemplateBuilder builder) {
+    public StatClient(@Value("${stats-service.url:http://localhost:9090}") String serverUrl,
+                      RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                        .requestFactory(settings -> new HttpComponentsClientHttpRequestFactory())
                         .build()
         );
     }
@@ -86,5 +86,4 @@ public class StatClient extends BaseClient {
             throw new StatsClientException("Statistics could not be retrieved", exception);
         }
     }
-
 }
