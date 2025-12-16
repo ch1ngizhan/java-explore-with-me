@@ -14,11 +14,16 @@ public interface CompilationMapper {
     @Mapping(target = "events", ignore = true)
     Compilation toEntity(NewCompilationDto request);
 
-    @Mapping(target = "events", qualifiedByName = "toEventShortWithoutStats")
+    @Mapping(
+            target = "events",
+            qualifiedByName = "toEventShortWithoutStatsSet"
+    )
     CompilationDto toDto(Compilation compilation);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "events", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateCompilationFromRequest(UpdateCompilationRequest request, @MappingTarget Compilation compilation);
+    void updateCompilationFromRequest(UpdateCompilationRequest request,
+                                      @MappingTarget Compilation compilation);
 }
+

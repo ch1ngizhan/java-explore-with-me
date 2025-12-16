@@ -10,8 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.user.dto.UserRequestDto;
 import ru.practicum.user.dto.UserDto;
+import ru.practicum.user.dto.UserRequestDto;
 import ru.practicum.user.service.UserService;
 
 import java.util.List;

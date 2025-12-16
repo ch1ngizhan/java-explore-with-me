@@ -24,18 +24,19 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         checkCategoryNameUnique(newCategoryDto.getName(), null);
 
-        Category category = CategoryMapper.toEntity(newCategoryDto);
+        Category category = categoryMapper.toEntity(newCategoryDto);
 
         Category savedCategory = categoryRepository.save(category);
 
         log.info("Создана категория: {}", savedCategory);
-        return CategoryMapper.toDto(savedCategory);
+        return categoryMapper.toDto(savedCategory);
     }
 
     @Override
@@ -58,11 +59,11 @@ public class CategoryServiceImpl implements CategoryService {
 
         checkCategoryNameUnique(newCategoryDto.getName(), categoryId);
 
-        CategoryMapper.updateCategoryFromDto(newCategoryDto, category);
+        categoryMapper.updateCategoryFromDto(newCategoryDto, category);
         Category updatedCategory = categoryRepository.save(category);
 
         log.info("Обновлена категория: {}", updatedCategory);
-        return CategoryMapper.toDto(updatedCategory);
+        return categoryMapper.toDto(updatedCategory);
     }
 
     @Override
@@ -74,7 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         List<CategoryDto> result = categoriesPage.stream()
-                .map(CategoryMapper::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
 
         log.info("Найдено {} категорий", result.size());
@@ -84,7 +85,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getCategoryById(Long categoryId) {
         Category category = getCategoryByIdOrThrow(categoryId);
-        return CategoryMapper.toDto(category);
+        return categoryMapper.toDto(category);
     }
 
     @Override
