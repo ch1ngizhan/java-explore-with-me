@@ -125,7 +125,7 @@ public class EventServiceImpl implements EventService {
             throw new ValidationException("Пользователь не является инициатором события и не может его редактировать");
 
         if (event.getState() == EventState.PUBLISHED)
-            throw new ValidationException("Изменять можно только не опубликованные события");
+            throw new ConflictException("Изменять можно только не опубликованные события");
 
         validateDateEvent(request.getEventDate(), 2);
 
@@ -320,7 +320,7 @@ public class EventServiceImpl implements EventService {
 
     private void saveHit(String path, String ip) {
         StatDto hit = new StatDto(
-                "main-service",
+                "ewm-main-service",
                 path,
                 ip,
                 LocalDateTime.now()
@@ -359,14 +359,18 @@ public class EventServiceImpl implements EventService {
         LocalDateTime end = LocalDateTime.now().plusDays(1);
 
         List<StatResponseDto> stats =
-                statsClient.getStats(start, end, uris, true, "main-service");
+                statsClient.getStats(start, end, uris, true);
 
         Map<Long, Long> result = eventIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> 0L));
 
         for (StatResponseDto stat : stats) {
-            Long eventId = Long.parseLong(stat.getUri().substring("/events/".length()));
-            result.put(eventId, stat.getHits());
+            try {
+                Long eventId = Long.parseLong(stat.getUri().substring("/events/".length()));
+                result.put(eventId, stat.getHits());
+            } catch (NumberFormatException e) {
+                log.warn("Невозможно извлечь ID события из URI: {}", stat.getUri());
+            }
         }
 
         return result;

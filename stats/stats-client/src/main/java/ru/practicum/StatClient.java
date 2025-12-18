@@ -46,25 +46,22 @@ public class StatClient {
     }
 
 
-
     public List<StatResponseDto> getStats(LocalDateTime start,
                                           LocalDateTime end,
                                           List<String> uris,
-                                          boolean unique,
-                                          String app) {
+                                          boolean unique) {
 
         Map<String, Object> params = new HashMap<>();
         params.put("start", start.format(FORMATTER));
         params.put("end", end.format(FORMATTER));
         params.put("unique", unique);
-        params.put("app", app);
 
         String path;
         if (uris == null || uris.isEmpty()) {
-            path = "/stats?start={start}&end={end}&unique={unique}&app={app}";
+            path = "/stats?start={start}&end={end}&unique={unique}";
         } else {
             params.put("uris", uris);
-            path = "/stats?start={start}&end={end}&uris={uris}&unique={unique}&app={app}";
+            path = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
         }
 
         ResponseEntity<List<StatResponseDto>> response =
@@ -72,7 +69,8 @@ public class StatClient {
                         path,
                         HttpMethod.GET,
                         null,
-                        new ParameterizedTypeReference<>() {},
+                        new ParameterizedTypeReference<>() {
+                        },
                         params
                 );
 

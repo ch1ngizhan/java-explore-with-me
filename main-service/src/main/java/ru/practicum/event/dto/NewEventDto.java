@@ -35,7 +35,7 @@ public class NewEventDto {
     @NotNull(message = "Место проведения события не может быть null")
     private LocationDto location;
 
-    private Boolean paid ;
+    private Boolean paid;
 
     @PositiveOrZero(message = "Лимит участников события должен быть нулевым или больше нуля")
     private Integer participantLimit;

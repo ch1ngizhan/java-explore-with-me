@@ -33,7 +33,6 @@ public class StatServiceImpl implements StatService {
         return StatMapper.toStatDto(stat);
     }
 
-    @Transactional(readOnly = true)
     @Override
     public List<StatResponseDto> readStat(LocalDateTime start, LocalDateTime end,
                                           List<String> uris, boolean unique) {
