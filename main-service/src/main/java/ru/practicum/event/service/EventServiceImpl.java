@@ -290,15 +290,34 @@ public class EventServiceImpl implements EventService {
         // 1. Сохраняем хит
         saveHit("/events/" + eventId, ip);
 
-        // 2. Получаем просмотры
-        Map<Long, Long> views = getViewsForEvents(List.of(eventId));
+        // 2. Инкрементируем локальный счетчик
+        event.setViews(event.getViews() + 1);
+        eventRepository.save(event);
+
+        // 3. Получаем статистику для подтверждения
+        Map<Long, Long> viewsFromStats = getViewsForEvents(List.of(eventId));
         Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
 
         EventDto dto = eventMapper.toEventDto(event);
-        dto.setViews(views.getOrDefault(eventId, 0L));
+        dto.setViews(viewsFromStats.getOrDefault(eventId, event.getViews()));
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0).longValue());
 
         return dto;
+    }
+
+    @Transactional
+    @Override
+    public void incrementViews(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
+
+        // Увеличиваем счетчик только для опубликованных событий
+        if (event.getState() == EventState.PUBLISHED) {
+            // Получаем текущее значение из статистики
+            Map<Long, Long> viewsFromStats = getViewsForEvents(List.of(eventId));
+            Long currentViews = viewsFromStats.getOrDefault(eventId, 0L);
+
+        }
     }
 
 
@@ -359,7 +378,7 @@ public class EventServiceImpl implements EventService {
         LocalDateTime end = LocalDateTime.now().plusDays(1);
 
         List<StatResponseDto> stats =
-                statsClient.getStats(start, end, uris, true);
+                statsClient.getStats(start, end, uris, false);
 
         Map<Long, Long> result = eventIds.stream()
                 .collect(Collectors.toMap(id -> id, id -> 0L));

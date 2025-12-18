@@ -14,21 +14,25 @@ public interface EventMapper {
 
     @Named("toEventShortWithoutStats")
     @Mapping(target = "confirmedRequests", ignore = true)
-    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "views", source = "views")
     EventShortDto toEventShortWithoutStats(Event event);
 
     @Named("toEventShortWithoutStatsSet")
     @IterableMapping(qualifiedByName = "toEventShortWithoutStats")
     Set<EventShortDto> toEventShortWithoutStatsSet(Set<Event> events);
 
-
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", source = "views")
     EventShortDto toEventShortDto(Event event);
 
+    @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "views", source = "views")
     EventDto toEventDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "views", constant = "0L")
     @Mapping(target = "category", source = "category")
     @Mapping(target = "paid", defaultValue = "false")
     @Mapping(target = "participantLimit", defaultValue = "0")
@@ -43,6 +47,7 @@ public interface EventMapper {
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
     @Mapping(target = "category", source = "category")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEventFromUserRequest(UpdateEventUserRequest request,
@@ -54,6 +59,7 @@ public interface EventMapper {
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "state", ignore = true)
+    @Mapping(target = "views", ignore = true)
     @Mapping(target = "category", source = "category")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEventFromAdminRequest(UpdateEventAdminRequest request,
