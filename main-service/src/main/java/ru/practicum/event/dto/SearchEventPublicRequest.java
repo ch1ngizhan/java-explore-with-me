@@ -28,9 +28,21 @@ public class SearchEventPublicRequest {
     @DateTimeFormat(pattern = DATE_TIME_PATTERN)
     private LocalDateTime rangeEnd;
 
-    private Boolean onlyAvailable = false;
+    private Boolean onlyAvailable;
     private SortState sort;
     private Integer from;
     private Integer size;
+
+    public Boolean getOnlyAvailable() {
+        return onlyAvailable != null ? onlyAvailable : false;
+    }
+
+    public Integer getFrom() {
+        return from != null ? from : 0;
+    }
+
+    public Integer getSize() {
+        return size != null ? size : 10;
+    }
 
 }

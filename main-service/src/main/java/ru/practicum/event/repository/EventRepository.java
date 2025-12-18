@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.event.model.Event;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,9 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
             WHERE e.id = :eventId"""
     )
     Optional<Event> findByIdNew(@Param("eventId") Long eventId);
+
+    @Query("SELECT COALESCE(MIN(e.createdOn), CURRENT_TIMESTAMP) FROM Event e")
+    LocalDateTime findEarliestEventDate();
 
     boolean existsByCategoryId(@Param("categoryId") Long categoryId);
 }

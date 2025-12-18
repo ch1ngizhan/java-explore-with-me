@@ -12,6 +12,7 @@ import ru.practicum.event.dto.EventDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.SearchEventPublicRequest;
 import ru.practicum.event.service.EventService;
+import ru.practicum.exception.BadRequestException;
 
 import java.util.List;
 
@@ -25,10 +26,18 @@ public class PublicEventController {
 
     @GetMapping
     public List<EventShortDto> getEventsPublic(@ModelAttribute @Valid SearchEventPublicRequest request,
-                                               HttpServletRequest httpRequest
-    ) {
+                                               HttpServletRequest httpRequest) {
         int size = (request.getSize() != null && request.getSize() > 0) ? request.getSize() : 10;
         int from = request.getFrom() != null ? request.getFrom() : 0;
+
+
+        if (from < 0) {
+            throw new BadRequestException("Параметр 'from' не может быть отрицательным");
+        }
+        if (size <= 0) {
+            throw new BadRequestException("Параметр 'size' должен быть положительным");
+        }
+
         PageRequest pageRequest = PageRequest.of(from / size, size);
         log.debug("Controller: getEventsPublic filters={}", request);
         return eventService.getEventsPublic(request, pageRequest, httpRequest.getRemoteAddr());

@@ -35,7 +35,7 @@ public class NewEventDto {
     @NotNull(message = "Место проведения события не может быть null")
     private LocationDto location;
 
-    private Boolean paid = false;
+    private Boolean paid ;
 
     @PositiveOrZero(message = "Лимит участников события должен быть нулевым или больше нуля")
     private Integer participantLimit;
@@ -46,5 +46,16 @@ public class NewEventDto {
     @Size(min = 3, max = 120, message = "Заголовок должен содержать от {min} до {max} символов")
     private String title;
 
+    public Boolean getPaid() {
+        return paid != null ? paid : false;
+    }
+
+    public Integer getParticipantLimit() {
+        return participantLimit != null ? participantLimit : 0;
+    }
+
+    public Boolean getRequestModeration() {
+        return requestModeration != null ? requestModeration : true;
+    }
 
 }

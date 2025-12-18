@@ -12,7 +12,6 @@ import java.util.Set;
 @Mapper(componentModel = "spring", uses = {LocationMapper.class})
 public interface EventMapper {
 
-
     @Named("toEventShortWithoutStats")
     @Mapping(target = "confirmedRequests", ignore = true)
     @Mapping(target = "views", ignore = true)
@@ -23,18 +22,17 @@ public interface EventMapper {
     Set<EventShortDto> toEventShortWithoutStatsSet(Set<Event> events);
 
 
-    EventShortDto toEventShortDto(Event event,
-                                  Integer confirmedRequests,
-                                  Long views);
+    EventShortDto toEventShortDto(Event event);
 
-    EventDto toEventDto(Event event,
-                        Integer confirmedRequests,
-                        Long views);
+    EventDto toEventDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "category", source = "category")
+    @Mapping(target = "paid", defaultValue = "false")
+    @Mapping(target = "participantLimit", defaultValue = "0")
+    @Mapping(target = "requestModeration", defaultValue = "true")
     Event fromNewEvent(NewEventDto dto,
                        User initiator,
                        Category category,
@@ -62,4 +60,3 @@ public interface EventMapper {
                                      @MappingTarget Event event,
                                      Category category);
 }
-
