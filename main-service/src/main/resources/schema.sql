@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS events (
     description        VARCHAR(7000)                           NOT NULL,
     category_id        BIGINT REFERENCES categories(id),
     initiator_id       BIGINT REFERENCES users (id),
-    views              BIGINT DEFAULT 0                        NOT NULL,
     created_on         TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
     event_date         TIMESTAMP WITHOUT TIME ZONE             NOT NULL,
     published_on       TIMESTAMP WITHOUT TIME ZONE,

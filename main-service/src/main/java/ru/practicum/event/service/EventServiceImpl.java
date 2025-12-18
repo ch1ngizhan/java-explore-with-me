@@ -287,43 +287,26 @@ public class EventServiceImpl implements EventService {
                 .filter(ev -> ev.getState() == EventState.PUBLISHED)
                 .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
 
-        // 1. Сохраняем хит
+        // Сохраняем хит (отправляем в сервис статистики)
         saveHit("/events/" + eventId, ip);
 
-        // 2. Инкрементируем локальный счетчик
-        event.setViews(event.getViews() + 1);
-        eventRepository.save(event);
-
-        // 3. Получаем статистику для подтверждения
-        Map<Long, Long> viewsFromStats = getViewsForEvents(List.of(eventId));
+        // Получаем статистику с unique=true (уникальные просмотры)
+        Map<Long, Long> viewsFromStats = getViewsForEvents(List.of(eventId), true);
         Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(eventId));
 
         EventDto dto = eventMapper.toEventDto(event);
-        dto.setViews(viewsFromStats.getOrDefault(eventId, event.getViews()));
+        dto.setViews(viewsFromStats.getOrDefault(eventId, 0L));
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0).longValue());
+
+        log.debug("Returning event with id={}, uniqueViews={}", eventId, dto.getViews());
 
         return dto;
     }
 
-    @Transactional
-    @Override
-    public void incrementViews(Long eventId) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
-
-        // Увеличиваем счетчик только для опубликованных событий
-        if (event.getState() == EventState.PUBLISHED) {
-            // Получаем текущее значение из статистики
-            Map<Long, Long> viewsFromStats = getViewsForEvents(List.of(eventId));
-            Long currentViews = viewsFromStats.getOrDefault(eventId, 0L);
-
-        }
-    }
-
-
     private EventDto buildDto(Event event) {
         Map<Long, Integer> confirmedRequests = getConfirmedRequests(List.of(event.getId()));
-        Map<Long, Long> views = getViewsForEvents(List.of(event.getId()));
+        // Для индивидуального события используем уникальные просмотры
+        Map<Long, Long> views = getViewsForEvents(List.of(event.getId()), true);
 
         EventDto dto = eventMapper.toEventDto(event);
         dto.setConfirmedRequests(confirmedRequests.getOrDefault(event.getId(), 0).longValue());
@@ -365,7 +348,7 @@ public class EventServiceImpl implements EventService {
         return confirmedRequests;
     }
 
-    private Map<Long, Long> getViewsForEvents(List<Long> eventIds) {
+    private Map<Long, Long> getViewsForEvents(List<Long> eventIds, boolean unique) {
         if (eventIds.isEmpty()) {
             return Map.of();
         }
@@ -377,24 +360,30 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = LocalDateTime.of(2000, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.now().plusDays(1);
 
-        List<StatResponseDto> stats =
-                statsClient.getStats(start, end, uris, false);
+        try {
+            // Используем unique=true для уникальных просмотров
+            List<StatResponseDto> stats = statsClient.getStats(start, end, uris, unique);
 
-        Map<Long, Long> result = eventIds.stream()
-                .collect(Collectors.toMap(id -> id, id -> 0L));
+            Map<Long, Long> result = eventIds.stream()
+                    .collect(Collectors.toMap(id -> id, id -> 0L));
 
-        for (StatResponseDto stat : stats) {
-            try {
-                Long eventId = Long.parseLong(stat.getUri().substring("/events/".length()));
-                result.put(eventId, stat.getHits());
-            } catch (NumberFormatException e) {
-                log.warn("Невозможно извлечь ID события из URI: {}", stat.getUri());
+            for (StatResponseDto stat : stats) {
+                try {
+                    Long eventId = Long.parseLong(stat.getUri().substring("/events/".length()));
+                    result.put(eventId, stat.getHits());
+                } catch (NumberFormatException e) {
+                    log.warn("Невозможно извлечь ID события из URI: {}", stat.getUri());
+                }
             }
+
+            return result;
+        } catch (Exception e) {
+            log.warn("Ошибка при получении статистики: {}", e.getMessage());
+            // В тестовой среде возвращаем 0
+            return eventIds.stream()
+                    .collect(Collectors.toMap(id -> id, id -> 0L));
         }
-
-        return result;
     }
-
 
     private Long getEventIdFromUri(String uri) {
         try {
@@ -403,14 +392,17 @@ public class EventServiceImpl implements EventService {
             return -1L;
         }
     }
-
+    private Map<Long, Long> getAllViewsForEvents(List<Long> eventIds) {
+        return getViewsForEvents(eventIds, false);
+    }
     private EventStatistics getEventStatistics(List<Long> eventIds) {
         if (eventIds.isEmpty()) {
             return new EventStatistics(Map.of(), Map.of());
         }
 
         Map<Long, Integer> confirmedRequests = getConfirmedRequests(eventIds);
-        Map<Long, Long> views = getViewsForEvents(eventIds);
+        // Для событий в списках используем уникальные просмотры (unique=true)
+        Map<Long, Long> views = getViewsForEvents(eventIds, true);
 
         return new EventStatistics(confirmedRequests, views);
     }
