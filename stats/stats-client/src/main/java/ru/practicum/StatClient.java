@@ -21,7 +21,7 @@ import java.util.List;
 public class StatClient {
 
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final org.springframework.web.client.RestTemplate restTemplate;
 

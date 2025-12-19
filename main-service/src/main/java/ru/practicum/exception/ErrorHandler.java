@@ -145,6 +145,7 @@ public class ErrorHandler {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", request);
     }
 
+
     private ErrorResponse buildResponse(HttpStatus httpStatus, String message, HttpServletRequest request) {
         String timestamp = LocalDateTime.now().format(FORMATTER);
         String status = httpStatus.name();
