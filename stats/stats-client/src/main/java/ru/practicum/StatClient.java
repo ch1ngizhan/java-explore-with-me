@@ -8,19 +8,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
 public class StatClient {
 
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private final org.springframework.web.client.RestTemplate restTemplate;
 
@@ -51,32 +50,28 @@ public class StatClient {
                                           List<String> uris,
                                           boolean unique) {
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("start", start.format(FORMATTER));
-        params.put("end", end.format(FORMATTER));
-        params.put("unique", unique);
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromPath("/stats")
+                .queryParam("start", start.format(FORMATTER))
+                .queryParam("end", end.format(FORMATTER))
+                .queryParam("unique", unique);
 
-        String path;
-        if (uris == null || uris.isEmpty()) {
-            path = "/stats?start={start}&end={end}&unique={unique}";
-        } else {
-            params.put("uris", uris);
-            path = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
+        if (uris != null) {
+            uris.forEach(uri -> builder.queryParam("uris", uri));
         }
 
         ResponseEntity<List<StatResponseDto>> response =
                 restTemplate.exchange(
-                        path,
+                        builder.toUriString(),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<>() {
-                        },
-                        params
+                        }
                 );
 
-        List<StatResponseDto> body = response.getBody();
-        log.debug("GET /stats <- {} records", body == null ? 0 : body.size());
 
-        return body == null ? List.of() : body;
+        return response.getBody() == null ? List.of() : response.getBody();
+
+
     }
 }

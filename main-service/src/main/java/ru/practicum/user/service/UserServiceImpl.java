@@ -17,8 +17,6 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.util.List;
 
-import static org.springframework.data.domain.Sort.Direction.ASC;
-
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -30,26 +28,35 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto createUser(UserRequestDto userRequest) {
+        log.debug("Попытка создания нового пользователя с email={}", userRequest.getEmail());
+
         if (userRepository.existsByEmail(userRequest.getEmail())) {
+            log.warn("Попытка создания пользователя с существующим email={}", userRequest.getEmail());
             throw new ConflictException("Пользователь с таким e-mail уже существует: " + userRequest.getEmail());
         }
 
         User user = UserMapper.toEntity(userRequest);
         user = userRepository.save(user);
-        log.info("Добавлен новый пользователь {}", user);
+        log.info("Добавлен новый пользователь: id={}, email={}", user.getId(), user.getEmail());
+
         return UserMapper.toDto(user);
     }
 
     @Override
     public List<UserDto> getUsers(List<Long> ids, Pageable pageable) {
+        log.debug("Запрос списка пользователей. ids={}, pageNumber={}, pageSize={}", ids, pageable.getPageNumber(), pageable.getPageSize());
+
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(ASC, "id")
+                Sort.by(Sort.Direction.ASC, "id")
         );
+
         List<User> users = (ids == null || ids.isEmpty())
                 ? userRepository.findAllList(sortedPageable)
                 : userRepository.findByIdIn(ids, sortedPageable);
+
+        log.info("Найдено {} пользователей", users.size());
         return users.stream()
                 .map(UserMapper::toDto)
                 .toList();
@@ -58,19 +65,27 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long userId) {
+        log.debug("Попытка удаления пользователя с id={}", userId);
         getUserByIdOrThrow(userId);
-        log.info("Удален пользователь с id {}", userId);
+
         userRepository.deleteById(userId);
+        log.info("Пользователь с id={} успешно удален", userId);
     }
 
     @Override
     public User getUserById(Long userId) {
+        log.debug("Запрос пользователя по id={}", userId);
         return getUserByIdOrThrow(userId);
     }
 
     @Override
     public User getUserByIdOrThrow(Long userId) {
+        log.debug("Проверка существования пользователя с id={}", userId);
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден"));
+                .orElseThrow(() -> {
+                    log.warn("Пользователь с id={} не найден", userId);
+                    return new NotFoundException("Пользователь с id=" + userId + " не найден");
+                });
     }
+
 }

@@ -6,12 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.StatDto;
 import ru.practicum.StatResponseDto;
-import ru.practicum.exception.WrongTimeException;
+import ru.practicum.StatsRequestDto;
 import ru.practicum.mapper.StatMapper;
 import ru.practicum.model.Stat;
 import ru.practicum.repository.StatServiceRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,25 +33,17 @@ public class StatServiceImpl implements StatService {
     }
 
     @Override
-    public List<StatResponseDto> readStat(LocalDateTime start, LocalDateTime end,
-                                          List<String> uris, boolean unique) {
-        if (start == null || end == null) {
-            throw new WrongTimeException("Start and end dates cannot be null");
-        }
-        if (start.isAfter(end)) {
-            throw new WrongTimeException("Start date cannot be after end date");
-        }
+    public List<StatResponseDto> readStat(StatsRequestDto request) {
+        List<String> uris = (request.getUris() == null || request.getUris().isEmpty())
+                ? null
+                : request.getUris();
 
-        List<Stat> stats;
-        if (uris == null || uris.isEmpty()) {
-            stats = statServiceRepository.findAllByTimestampBetween(start, end);
-            log.info("Found {} stats without URI filter", stats.size());
-        } else {
-            stats = statServiceRepository.findAllByTimestampBetweenAndUriIn(start, end, uris);
-            log.info("Found {} stats with URI filter: {}", stats.size(), uris);
-        }
+        List<StatResponseDto> result = request.getUnique()
+                ? statServiceRepository.getUniqueStats(request.getStart(), request.getEnd(), uris)
+                : statServiceRepository.getStats(request.getStart(), request.getEnd(), uris);
 
-        return convertToResponseDto(stats, unique);
+        log.info("Размер полученного списка статистики: {}", result.size());
+        return result;
     }
 
     private List<StatResponseDto> convertToResponseDto(List<Stat> stats, boolean unique) {

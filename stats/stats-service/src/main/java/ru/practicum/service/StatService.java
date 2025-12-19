@@ -3,8 +3,8 @@ package ru.practicum.service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.StatDto;
 import ru.practicum.StatResponseDto;
+import ru.practicum.StatsRequestDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatService {
@@ -12,5 +12,5 @@ public interface StatService {
     StatDto createStat(StatDto statDto);
 
     @Transactional(readOnly = true)
-    List<StatResponseDto> readStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique);
+    List<StatResponseDto> readStat(StatsRequestDto request);
 }
