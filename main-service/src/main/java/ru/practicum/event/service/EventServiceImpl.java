@@ -31,7 +31,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -423,8 +422,8 @@ public class EventServiceImpl implements EventService {
                     ip,
                     LocalDateTime.now()
             );
-            // Асинхронный вызов
-            CompletableFuture.runAsync(() -> statsClient.addStatEvent(hit));
+            // Синхронный вызов
+            statsClient.addStatEvent(hit);
         } catch (Exception e) {
             log.warn("Не удалось сохранить хит для path={}, ip={}: {}", path, ip, e.getMessage());
         }
