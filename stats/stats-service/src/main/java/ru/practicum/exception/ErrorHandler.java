@@ -29,10 +29,6 @@ public class ErrorHandler {
     public ResponseEntity<ErrorResponse> internalServerError(final Exception e) {
         return handleException(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    @ExceptionHandler(WrongTimeException.class)
-    public ResponseEntity<ErrorResponse> wrongTimeException(final WrongTimeException e) {
-        return handleException(e, HttpStatus.BAD_REQUEST);
-    }
 
     private ResponseEntity<ErrorResponse> handleException(final Exception e, HttpStatus status) {
         String errorMessage = status.is4xxClientError() ? "Incorrectly made request." : "Internal Server Error";
@@ -46,4 +42,3 @@ public class ErrorHandler {
         return new ResponseEntity<>(new ErrorResponse(errorStatus, errorDescription, errorMessage, timestamp), status);
     }
 }
-
