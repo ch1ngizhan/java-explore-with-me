@@ -31,16 +31,16 @@ public class StatClient {
                 .build();
     }
 
-    public void addStatEvent(StatDto StatDto) {
+    public void addStatEvent(StatDto statDto) {
         try {
             restClient.post()
                     .uri("/hit")
-                    .body(StatDto)
+                    .body(statDto)
                     .retrieve()
                     .toBodilessEntity();
 
             log.debug("Запись обращения к эндпоинту успешно сохранена: приложение {}, URI {}",
-                    StatDto.getApp(), StatDto.getUri());
+                    statDto.getApp(), statDto.getUri());
         } catch (Exception exception) {
             log.error("Ошибка при сохранении статистики: {}", exception.getMessage());
             throw new StatsClientException("Endpoint statistics could not be saved", exception);
