@@ -8,14 +8,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
-import ru.practicum.StatDto;
-import ru.practicum.StatResponseDto;
 import ru.practicum.exception.StatsClientException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
 
 
 @Slf4j
