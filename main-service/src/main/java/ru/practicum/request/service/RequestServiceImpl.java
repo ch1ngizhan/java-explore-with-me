@@ -61,7 +61,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (!hasSlots(event)) {
             log.warn("Нет свободных мест для события {}", eventId);
-            throw new ConflictException("Достигнут лимит по количеству участников события с id=" + eventId);
+            throw new ConflictException(String.format("Достигнут лимит по количеству участников события с id=%d", eventId));
         }
 
         Request request = requestMapper.toEntity(event, user, RequestStatus.PENDING);
@@ -96,7 +96,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (!request.getRequester().getId().equals(userId)) {
             log.warn("Попытка отмены чужого запроса: requestId={}, userId={}", requestId, userId);
-            throw new ConflictException("Запрос с id=" + requestId + " не принадлежит пользователю с id=" + userId);
+            throw new ConflictException(String.format("Запрос с id=%d не принадлежит пользователю с id=%d", requestId, userId));
         }
 
         request.canceled();
@@ -113,7 +113,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (!event.getInitiator().getId().equals(userId)) {
             log.warn("Пользователь {} не является инициатором события {}", userId, eventId);
-            throw new ValidationException("Пользователь с id=" + userId + " не является создателем события");
+            throw new ValidationException(String.format("Пользователь с id=%d не является создателем события", userId));
         }
 
         List<ParticipationRequestDto> requests = requestRepository.findAllParticipationRequestByEventId(eventId)
@@ -133,7 +133,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (!event.getInitiator().getId().equals(userId)) {
             log.warn("Пользователь {} не инициатор события {}", userId, eventId);
-            throw new ValidationException("Пользователь с id=" + userId + " не является создателем события");
+            throw new ValidationException(String.format("Пользователь с id=%d не является создателем события", userId));
         }
 
         if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
@@ -202,7 +202,7 @@ public class RequestServiceImpl implements RequestService {
 
     private Request getRequestOrThrow(Long requestId) {
         return requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Запрос с id=" + requestId + " не найден"));
+                .orElseThrow(() -> new NotFoundException(String.format("Запрос с id=%d не найден", requestId)));
     }
 
     private boolean hasSlots(Event event) {
@@ -233,7 +233,7 @@ public class RequestServiceImpl implements RequestService {
             }
 
             if (!req.getEvent().getId().equals(eventId)) {
-                throw new ConflictException("Запрос с id=" + req.getId() + " не относится к событию с id=" + eventId);
+                throw new ConflictException(String.format("Запрос с id=%d не относится к событию с id=%d", req.getId(), eventId));
             }
         }
     }

@@ -124,7 +124,7 @@ public class EventServiceImpl implements EventService {
 
         if (!event.getInitiator().getId().equals(userId)) {
             log.warn("Событие с id={} не принадлежит пользователю с id={}", eventId, userId);
-            throw new NotFoundException("Событие c id " + eventId + " не найдено у пользователя с id " + userId);
+            throw new NotFoundException(String.format("Событие c id=%d не найдено у пользователя с id=%d", eventId, userId));
         }
 
         saveHit("/events/" + eventId, ip);
@@ -193,7 +193,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event getEventOrThrow(Long eventId) {
         return eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
+                .orElseThrow(() -> new NotFoundException(String.format("Событие c id=%d не найдено", eventId)));
     }
 
     @Override
@@ -266,7 +266,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdNew(eventId)
                 .orElseThrow(() -> {
                     log.warn("Событие с id={} не найдено", eventId);
-                    return new NotFoundException("Событие c id " + eventId + " не найдено");
+                    return new NotFoundException(String.format("Событие c id=%d не найдено", eventId));
                 });
 
         if (request.getStateAction() != null) {
@@ -391,7 +391,7 @@ public class EventServiceImpl implements EventService {
     public EventDto getEventByIdPublic(Long eventId, String ip) {
         Event event = eventRepository.findByIdNew(eventId)
                 .filter(ev -> ev.getState() == EventState.PUBLISHED)
-                .orElseThrow(() -> new NotFoundException("Событие c id " + eventId + " не найдено"));
+                .orElseThrow(() -> new NotFoundException(String.format("Событие c id=%d не найдено", eventId)));
 
         saveHit("/events/" + eventId, ip);
 
