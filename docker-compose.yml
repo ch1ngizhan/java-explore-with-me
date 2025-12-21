@@ -36,11 +36,19 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      - stats-db
+      stats-db:
+        condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/statDB
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   ewm-service:
     build: ./main-service
@@ -48,10 +56,20 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - stats-server
-      - ewm-db
+      stats-server:
+        condition: service_healthy
+      ewm-db:
+        condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewmDB
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
       - STATS_SERVER_URL=http://stats-server:9090
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVER_ADDRESS=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

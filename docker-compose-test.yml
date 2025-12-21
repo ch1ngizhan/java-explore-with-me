@@ -19,7 +19,7 @@ services:
     image: postgres:16.1
     container_name: main_db_test
     ports:
-      - "2211:2001"
+      - "0806:1972"
     environment:
       - POSTGRES_DB=mainDB_local
       - POSTGRES_USER=localuser
