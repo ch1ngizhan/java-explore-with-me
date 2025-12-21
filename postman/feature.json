@@ -1,0 +1,152 @@
+{
+  "info": {
+    "_postman_id": "comments",
+    "name": "Comment Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "1" },
+    { "key": "eventId", "value": "1" },
+    { "key": "commentId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Create comment",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Первый комментарий\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/comments/{{eventId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "comments", "{{eventId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201 CREATED', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.expect(body).to.have.all.keys('id','text','userId','eventId','createdDate');",
+              "pm.environment.set('commentId', body.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Update comment",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"Комментарий обновлён\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/comments/{{eventId}}/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "comments", "{{eventId}}", "{{commentId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.expect(body.text).to.eql('Комментарий обновлён');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Get comments for event (public)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/comments/event/{{eventId}}?from=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["comments", "event", "{{eventId}}"],
+          "query": [
+            { "key": "from", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.expect(body).to.be.an('array');",
+              "pm.expect(body.some(c => c.id === Number(pm.environment.get('commentId')))).to.be.true;"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Get comments for user",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/comments?from=0&size=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "comments"],
+          "query": [
+            { "key": "from", "value": "0" },
+            { "key": "size", "value": "10" }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "body.forEach(c => pm.expect(c.userId).to.eql(Number(pm.environment.get('userId'))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Delete comment (user)",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}/comments/{{commentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "{{userId}}", "comments", "{{commentId}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('204 NO CONTENT', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
