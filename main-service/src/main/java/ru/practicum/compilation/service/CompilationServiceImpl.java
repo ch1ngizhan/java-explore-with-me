@@ -71,7 +71,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         if (!compilationRepository.existsById(compId)) {
             log.warn("Попытка удалить несуществующую подборку id={}", compId);
-            throw new NotFoundException("Подборка с идентификатором " + compId + " не найдена");
+            throw new NotFoundException(String.format("Подборка с идентификатором %d не найдена", compId));
         }
 
         compilationRepository.deleteById(compId);
@@ -89,7 +89,7 @@ public class CompilationServiceImpl implements CompilationService {
                 && !request.getTitle().equals(compilation.getTitle())
                 && compilationRepository.existsByTitle(request.getTitle())) {
             log.warn("Попытка обновить подборку с дублирующимся названием: {}", request.getTitle());
-            throw new ConflictException("Подборка с названием \"" + request.getTitle() + "\" уже существует");
+            throw new ConflictException(String.format("Подборка с названием \"%s\" уже существует", request.getTitle()));
         }
 
         if (request.getEvents() != null) {
@@ -159,7 +159,7 @@ public class CompilationServiceImpl implements CompilationService {
         return compilationRepository.findByIdWithEvents(compId)
                 .orElseThrow(() -> {
                     log.warn("Подборка не найдена id={}", compId);
-                    return new NotFoundException("Подборка с идентификатором " + compId + " не найдена");
+                    return new NotFoundException(String.format("Подборка с идентификатором %d не найдена", compId));
                 });
     }
 }

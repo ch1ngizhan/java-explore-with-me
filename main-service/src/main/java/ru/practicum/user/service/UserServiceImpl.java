@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> {
                     log.warn("Пользователь с id={} не найден", userId);
-                    return new NotFoundException("Пользователь с id=" + userId + " не найден");
+                    return new NotFoundException(String.format("Пользователь с id=%d не найден", userId));
                 });
     }
 

@@ -111,7 +111,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> {
                     log.warn("Категория не найдена: id={}", categoryId);
-                    return new NotFoundException("Категория с id " + categoryId + " не найдена");
+                    return new NotFoundException(String.format("Категория с id=%d не найдена", categoryId));
                 });
     }
 
@@ -125,7 +125,7 @@ public class CategoryServiceImpl implements CategoryService {
         existingCategory.ifPresent(category -> {
             log.warn("Конфликт имени категории: name={}, existingId={}",
                     name, category.getId());
-            throw new ConflictException("Категория с названием '" + name + "' уже существует");
+            throw new ConflictException(String.format("Категория с названием '%s' уже существует", name));
         });
     }
 }
